@@ -29,7 +29,7 @@ export default class Controller {
 	updateState(newState) {
         this._activeRoute = newState;
         this._filter();
-        this.view.updateFilterButtons(newState); // TODO wrong
+        this.view.updateFilterButtons(newState);
     }
 
 

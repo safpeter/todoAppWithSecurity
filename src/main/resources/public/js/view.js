@@ -17,9 +17,9 @@ export default class View {
 			this.editItem(target);
 		});
 
-        this.$filterAll = document.getElementById("filterAll");
-        this.$filterActive = document.getElementById("filterActive");
-        this.$filterComplete = document.getElementById("filterCompleted");
+        this.$filterAll = document.getElementById("filter_");
+        this.$filterActive = document.getElementById("filter_active");
+        this.$filterComplete = document.getElementById("filter_complete");
 	}
 
     bindFilterAll(handler) {
@@ -125,8 +125,8 @@ export default class View {
 	 * @param {string} route The current route
 	 */
 	updateFilterButtons(route) {
-	    // TODO wrong now
-		//qs('.filters>.selected').className = '';
+		qs('.filters>.selected').className = '';
+		document.getElementById("filter_" + route).className = 'selected';
 		//qs(`.filters>[href="#/${route}"]`).className = 'selected';
 	}
 
