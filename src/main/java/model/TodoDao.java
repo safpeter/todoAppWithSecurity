@@ -36,8 +36,13 @@ public class TodoDao {
         ofStatus(Status.COMPLETE).forEach(t -> TodoDao.remove(t.getId()));
     }
 
-    public static void toggleStatus(String id) {
-        find(id).toggleStatus();
+    public static void toggleStatus(String id, boolean isComplete) {
+        Todo todo = find(id);
+        if (isComplete) {
+            todo.setStatus(Status.COMPLETE);
+        } else {
+            todo.setStatus(Status.ACTIVE);
+        }
     }
 
     public static void toggleAll(boolean complete) {

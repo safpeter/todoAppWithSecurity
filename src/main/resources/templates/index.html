@@ -1,20 +1,35 @@
-<!doctype html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
-<html lang="en" data-framework="intercoolerjs" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="utf-8">
-        <title>Basic TODO list</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/css/styles.css">
-    </head>
-    <body>
-    <section id="todoapp" ic-target="this" th:include="todoList">
-
-    </section>
-        <div id="info">
-            <p>Double-click to edit a todo</p>
-        </div>
-    <script src="/js/vendor/jquery-1.12.4.min.js"></script>
-    <script src="/js/vendor/intercooler-0.9.6.min.js"></script>
-    <script src="/js/app.js"></script>
-    </body>
+<!doctype html>
+<html lang="en" data-framework="es6">
+	<head>
+		<meta charset="utf-8">
+		<title>ES6 • TodoMVC</title>
+		<link rel="stylesheet" href="css/index.css">
+	</head>
+	<body>
+		<section class="todoapp">
+			<header class="header">
+				<h1>todos</h1>
+				<input class="new-todo" placeholder="What needs to be done?" autofocus>
+			</header>
+			<section style="display:none" class="main">
+				<input class="toggle-all" type="checkbox">
+				<label for="toggle-all">Mark all as complete</label>
+				<ul class="todo-list"></ul>
+				<footer class="footer">
+					<span class="todo-count"></span>
+					<div class="filters">
+						<a href='javascript:' id="filterAll" class="selected">All</a>
+						<a href='javascript:' id="filterActive">Active</a>
+						<a href='javascript:' id="filterCompleted">Completed</a>
+					</div>
+					<button class="clear-completed">Clear completed</button>
+				</footer>
+			</section>
+		</section>
+		<footer class="info">
+			<p>Double-click to edit a todo</p>
+			<p>Based on <a href="http://todomvc.com">TodoMVC</a></p>
+		</footer>
+		<script src="js/app.js" type="module"></script>
+	</body>
 </html>

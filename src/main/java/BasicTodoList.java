@@ -1,11 +1,14 @@
 import model.Status;
 import model.Todo;
 import model.TodoDao;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import spark.ModelAndView;
 import spark.Request;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -14,6 +17,10 @@ import static spark.Spark.*;
 public class BasicTodoList {
 
     public static void main(String[] args) {
+
+        TodoDao.add(Todo.create("first TODO item"));
+        TodoDao.add(Todo.create("second TODO item"));
+        TodoDao.add(Todo.create("third TODO item"));
 
         exception(Exception.class, (e, req, res) -> e.printStackTrace()); // print all exceptions
         staticFiles.location("/public");
@@ -24,47 +31,61 @@ public class BasicTodoList {
 
         // Add new
         post("/todos", (req, res) -> {
-            TodoDao.add(Todo.create(req.queryParams("todo-title")));
-            return renderTodos(req);
+            Todo newTodo = Todo.create(req.queryParams("todo-title"));
+            TodoDao.add(newTodo);
+            return newTodo.getId();  //renderTodos(req);
+        });
+
+        // List by id
+        post("/list", (req, resp) -> {
+            List<Todo> daos = TodoDao.ofStatus(req.queryParams("status"));
+            JSONArray arr = new JSONArray();
+            for (Todo dao : daos) {
+                JSONObject jo = new JSONObject();
+                jo.put("id", dao.getId());
+                jo.put("title", dao.getTitle());
+                jo.put("completed", dao.isComplete());
+                arr.put(jo);
+            }
+            return arr.toString(2);
         });
 
         // Remove all completed
         delete("/todos/completed", (req, res) -> {
             TodoDao.removeCompleted();
-            return renderTodos(req);
+            return "";
         });
 
         // Toggle all status
         put("/todos/toggle_status", (req, res) -> {
-            TodoDao.toggleAll(req.queryParams("toggle-all") != null);
-            return renderTodos(req);
+            String complete = req.queryParams("toggle-all");
+            TodoDao.toggleAll(complete.equals("true"));
+            return "";
         });
 
         // Remove by id
         delete("/todos/:id", (req, res) -> {
             TodoDao.remove(req.params("id"));
-            return renderTodos(req);
+            return "success";
         });
 
         // Update by id
         put("/todos/:id", (req, res) -> {
             TodoDao.update(req.params("id"), req.queryParams("todo-title"));
-            return renderTodos(req);
+            return "success";
+        });
+
+        // Find by id
+        get("/todos/:id", (req, res) -> {
+            return TodoDao.find(req.params("id")).getTitle();
         });
 
         // Toggle status by id
         put("/todos/:id/toggle_status", (req, res) -> {
-            TodoDao.toggleStatus(req.params("id"));
-            return renderTodos(req);
+            boolean completed = req.queryParams("status").equals("true");
+            TodoDao.toggleStatus(req.params("id"), completed);
+            return "success";
         });
-
-        // Edit by id
-        get("/todos/:id/edit", (req, res) -> renderEditTodo(req));
-
-    }
-
-    private static String renderEditTodo(Request req) {
-        return renderTemplate("editTodo.html", new HashMap(){{ put("todo", TodoDao.find(req.params("id"))); }});
     }
 
     private static String renderTodos(Request req) {
@@ -76,9 +97,6 @@ public class BasicTodoList {
         model.put("anyCompleteTodos", TodoDao.ofStatus(Status.COMPLETE).size() > 0);
         model.put("allComplete", TodoDao.all().size() == TodoDao.ofStatus(Status.COMPLETE).size());
         model.put("status", Optional.ofNullable(statusStr).orElse(""));
-        if ("true".equals(req.queryParams("ic-request"))) {
-            return renderTemplate("todoList", model);
-        }
         return renderTemplate("index", model);
     }
 

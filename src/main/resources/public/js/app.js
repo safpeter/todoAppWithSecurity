@@ -1,15 +1,9 @@
-$(document)
-    .keyup('input', function (e) {
-        if (e.keyCode === 27) {
-            $(e.target).trigger('resetEscape');
-        }
-    })
-    .click(function (e) {
-        if ($('#todo-edit').length > 0 && !$(e.target).is('#todo-edit')) {
-            $("#edit-form").trigger('submit');
-        }
-    });
+import Controller from './controller.js';
+import View from './view.js';
 
-Intercooler.ready(function () {
-    $("[autofocus]:last").focus();
-});
+const view = new View();
+const controller = new Controller(view);
+
+const setView = () => controller.setView(document.location.hash);
+window.addEventListener('load', setView);
+window.addEventListener('hashchange', setView);

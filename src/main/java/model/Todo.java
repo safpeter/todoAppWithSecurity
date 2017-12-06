@@ -38,10 +38,6 @@ public class Todo {
         this.status = status;
     }
 
-    public void toggleStatus() {
-        this.status = isComplete() ? Status.ACTIVE : Status.COMPLETE;
-    }
-
     public boolean isComplete() {
         return this.status == Status.COMPLETE;
     }

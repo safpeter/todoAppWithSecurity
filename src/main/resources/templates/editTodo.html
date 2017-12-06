@@ -1,6 +1,0 @@
-<li class="editing" xmlns:th="http://www.thymeleaf.org">
-    <form id="edit-form" th:attr="ic-put-to='/todos/' + ${todo.id}">
-        <input id="todo-edit" ic-get-from="/" ic-trigger-on="resetEscape"
-               name="todo-title" class="edit" th:value="${todo.title}" autofocus>
-    </form>
-</li>

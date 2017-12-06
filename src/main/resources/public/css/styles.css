@@ -311,7 +311,6 @@ footer:before {
     line-height: 20px;
     text-decoration: none;
     cursor: pointer;
-    position: relative;
 }
 
 #clear-completed:hover {
