@@ -29,7 +29,10 @@ public class BasicTodoList {
         port(9999);
 
         // Render main UI
-        get("/", (req, res) -> renderTodos(req));
+        get("/", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+            return renderTemplate("index", model);
+        });
 
         // Add new
         post("/todos", (req, res) -> {
@@ -78,9 +81,7 @@ public class BasicTodoList {
         });
 
         // Find by id
-        get("/todos/:id", (req, res) -> {
-            return TodoDao.find(req.params("id")).getTitle();
-        });
+        get("/todos/:id", (req, res) -> TodoDao.find(req.params("id")).getTitle());
 
         // Toggle status by id
         put("/todos/:id/toggle_status", (req, res) -> {
@@ -88,18 +89,6 @@ public class BasicTodoList {
             TodoDao.toggleStatus(req.params("id"), completed);
             return SUCCESS;
         });
-    }
-
-    private static String renderTodos(Request req) {
-        String statusStr = req.queryParams("status");
-        Map<String, Object> model = new HashMap<>();
-        model.put("todos", TodoDao.ofStatus(statusStr));
-        model.put("filter", Optional.ofNullable(statusStr).orElse(""));
-        model.put("activeCount", TodoDao.ofStatus(Status.ACTIVE).size());
-        model.put("anyCompleteTodos", TodoDao.ofStatus(Status.COMPLETE).size() > 0);
-        model.put("allComplete", TodoDao.all().size() == TodoDao.ofStatus(Status.COMPLETE).size());
-        model.put("status", Optional.ofNullable(statusStr).orElse(""));
-        return renderTemplate("index", model);
     }
 
     private static String renderTemplate(String template, Map model) {
