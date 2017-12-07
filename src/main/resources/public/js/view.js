@@ -39,7 +39,7 @@ export default class View {
 	/**
 	 * Put an item into edit mode.
 	 *
-	 * @param target Target Item's label Element
+	 * @param target Target item's label Element
 	 */
 	editItem(target) {
 		const listItem = target.parentElement;
@@ -60,12 +60,16 @@ export default class View {
 	 * @param items Array of items to display
 	 */
 	showItems(items) {
-		this.$todoList.innerHTML = items.reduce((a, item) => a + `
+	    let str = "";
+        for (let item of items) {
+            str += `
 <li data-id="${item.id}"${item.completed ? ' class="completed"' : ''}>
 	<input class="toggle" type="checkbox" ${item.completed ? 'checked' : ''}>
 	<label>${View.escapeForHTML(item.title)}</label>
 	<button class="destroy"></button>
-</li>`, '');
+</li>`
+        }
+        this.$todoList.innerHTML = str;
 	}
 
 	/**
@@ -75,7 +79,6 @@ export default class View {
 	 */
 	removeItem(id) {
 		const elem = document.querySelector(`[data-id="${id}"]`);
-
 		if (elem) {
 			this.$todoList.removeChild(elem);
 		}
@@ -267,7 +270,7 @@ export default class View {
     static escapeForHTML(s) {
         return s.replace(/[&<]/g, c => c === '&' ? '&amp;' : '&lt;');
     }
-    
+
     static itemId(element) {
         return element.parentNode.dataset.id;
     }
