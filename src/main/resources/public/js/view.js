@@ -1,19 +1,17 @@
-import {qs, $delegate, escapeForHTML} from './helpers.js';
 
-const _itemId = element => element.parentNode.dataset.id;
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
 
 export default class View {
 
 	constructor() {
-		this.$todoList = qs('.todo-list');
-		this.$todoItemCounter = qs('.todo-count');
-		this.$clearCompleted = qs('.clear-completed');
-		this.$main = qs('.main');
-		this.$toggleAll = qs('.toggle-all');
-		this.$newTodo = qs('.new-todo');
-		$delegate(this.$todoList, 'li label', 'dblclick', ({target}) => {
+		this.$todoList = document.querySelector('.todo-list');
+		this.$todoItemCounter = document.querySelector('.todo-count');
+		this.$clearCompleted = document.querySelector('.clear-completed');
+		this.$main = document.querySelector('.main');
+		this.$toggleAll = document.querySelector('.toggle-all');
+		this.$newTodo = document.querySelector('.new-todo');
+        View.delegate(this.$todoList, 'li label', 'dblclick', ({target}) => {
 			this.editItem(target);
 		});
 
@@ -41,7 +39,7 @@ export default class View {
 	/**
 	 * Put an item into edit mode.
 	 *
-	 * @param {!Element} target Target Item's label Element
+	 * @param target Target Item's label Element
 	 */
 	editItem(target) {
 		const listItem = target.parentElement;
@@ -65,7 +63,7 @@ export default class View {
 		this.$todoList.innerHTML = items.reduce((a, item) => a + `
 <li data-id="${item.id}"${item.completed ? ' class="completed"' : ''}>
 	<input class="toggle" type="checkbox" ${item.completed ? 'checked' : ''}>
-	<label>${escapeForHTML(item.title)}</label>
+	<label>${View.escapeForHTML(item.title)}</label>
 	<button class="destroy"></button>
 </li>`, '');
 	}
@@ -76,7 +74,7 @@ export default class View {
 	 * @param {number} id Item ID of the item to remove
 	 */
 	removeItem(id) {
-		const elem = qs(`[data-id="${id}"]`);
+		const elem = document.querySelector(`[data-id="${id}"]`);
 
 		if (elem) {
 			this.$todoList.removeChild(elem);
@@ -125,9 +123,8 @@ export default class View {
 	 * @param {string} route The current route
 	 */
 	updateFilterButtons(route) {
-		qs('.filters>.selected').className = '';
+        document.querySelector('.filters>.selected').className = '';
 		document.getElementById("filter_" + route).className = 'selected';
-		//qs(`.filters>[href="#/${route}"]`).className = 'selected';
 	}
 
 	/**
@@ -138,39 +135,20 @@ export default class View {
 	}
 
 	/**
-	 * Render an item as either completed or not.
-	 *
-	 * @param {!number} id Item ID
-	 * @param {!boolean} completed True if the item is completed
-	 */
-	setItemComplete(id, completed) {
-		const listItem = qs(`[data-id="${id}"]`);
-
-		if (!listItem) {
-			return;
-		}
-
-		listItem.className = completed ? 'completed' : '';
-
-		// In case it was toggled from an event and not by clicking the checkbox
-		qs('input', listItem).checked = completed;
-	}
-
-	/**
 	 * Bring an item out of edit mode.
 	 *
 	 * @param {!number} id Item ID of the item in edit
 	 * @param {!string} title New title for the item in edit
 	 */
 	editItemDone(id, title) {
-		const listItem = qs(`[data-id="${id}"]`);
+		const listItem = document.querySelector(`[data-id="${id}"]`);
 
-		const input = qs('input.edit', listItem);
+		const input = listItem.querySelector('input.edit');
 		listItem.removeChild(input);
 
 		listItem.classList.remove('editing');
 
-		qs('label', listItem).textContent = title;
+        listItem.querySelector('label').textContent = title;
 	}
 
 	/**
@@ -205,8 +183,8 @@ export default class View {
 	 * @param {Function} handler Function called on synthetic event.
 	 */
 	bindRemoveItem(handler) {
-		$delegate(this.$todoList, '.destroy', 'click', ({target}) => {
-			handler(_itemId(target));
+        View.delegate(this.$todoList, '.destroy', 'click', ({target}) => {
+			handler(View.itemId(target));
 		});
 	}
 
@@ -214,8 +192,8 @@ export default class View {
 	 * @param {Function} handler Function called on synthetic event.
 	 */
 	bindToggleItem(handler) {
-		$delegate(this.$todoList, '.toggle', 'click', ({target}) => {
-			handler(_itemId(target), target.checked);
+        View.delegate(this.$todoList, '.toggle', 'click', ({target}) => {
+			handler(View.itemId(target), target.checked);
 		});
 	}
 
@@ -223,14 +201,14 @@ export default class View {
 	 * @param {Function} handler Function called on synthetic event.
 	 */
 	bindEditItemSave(handler) {
-		$delegate(this.$todoList, 'li .edit', 'blur', ({target}) => {
+        View.delegate(this.$todoList, 'li .edit', 'blur', ({target}) => {
 			if (!target.dataset.iscanceled) {
-				handler(_itemId(target), target.value.trim());
+				handler(View.itemId(target), target.value.trim());
 			}
 		}, true);
 
 		// Remove the cursor from the input when you hit enter just like if it were a real form
-		$delegate(this.$todoList, 'li .edit', 'keypress', ({target, keyCode}) => {
+        View.delegate(this.$todoList, 'li .edit', 'keypress', ({target, keyCode}) => {
 			if (keyCode === ENTER_KEY) {
 				target.blur();
 			}
@@ -241,13 +219,57 @@ export default class View {
 	 * @param {Function} handler Function called on synthetic event.
 	 */
 	bindEditItemCancel(handler) {
-		$delegate(this.$todoList, 'li .edit', 'keyup', ({target, keyCode}) => {
+		View.delegate(this.$todoList, 'li .edit', 'keyup', ({target, keyCode}) => {
 			if (keyCode === ESCAPE_KEY) {
 				target.dataset.iscanceled = true;
 				target.blur();
-
-				handler(_itemId(target));
+				handler(View.itemId(target));
 			}
 		});
 	}
+
+	// helpers
+
+    /**
+     * Attach a handler to an event for all elements matching a selector.
+     *
+     * @param {Element} target Element which the event must bubble to
+     * @param {string} selector Selector to match
+     * @param {string} type Event name
+     * @param {Function} handler Function called when the event bubbles to target
+     *                           from an element matching selector
+     * @param {boolean} [capture] Capture the event
+     */
+    static delegate(target, selector, type, handler, capture) {
+        const dispatchEvent = event => {
+            const targetElement = event.target;
+            const potentialElements = target.querySelectorAll(selector);
+            let i = potentialElements.length;
+
+            while (i--) {
+                if (potentialElements[i] === targetElement) {
+                    handler.call(targetElement, event);
+                    break;
+                }
+            }
+        };
+        target.addEventListener(type, dispatchEvent, capture);
+    }
+
+    /**
+     * Encode less-than and ampersand characters with entity codes to make user-
+     * provided text safe to parse as HTML.
+     *
+     * @param {string} s String to escape
+     *
+     * @returns {string} String with unsafe characters escaped with entity codes
+     */
+    static escapeForHTML(s) {
+        return s.replace(/[&<]/g, c => c === '&' ? '&amp;' : '&lt;');
+    }
+    
+    static itemId(element) {
+        return element.parentNode.dataset.id;
+    }
+
 }

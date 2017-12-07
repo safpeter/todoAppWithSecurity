@@ -2,19 +2,18 @@ import View from './view.js';
 
 export default class Controller {
 	/**
-	 * @param  {!View} view A View instance
+	 * @param {!View} view A View instance
 	 */
 	constructor(view) {
 		this.view = view;
+        this._activeState = '';
+        this._lastActiveState = null;
 
 		view.bindAddItem(this.addItem.bind(this));
 		view.bindEditItemSave(this.editItemSave.bind(this));
 		view.bindEditItemCancel(this.editItemCancel.bind(this));
 		view.bindRemoveItem(this.removeItem.bind(this));
-		view.bindToggleItem((id, completed) => {
-			this.toggleCompleted(id, completed);
-			this._filter();
-		});
+		view.bindToggleItem(this.toggleCompleted.bind(this));
 		view.bindRemoveCompleted(this.removeCompletedItems.bind(this));
 		view.bindToggleAll(this.toggleAll.bind(this));
 
@@ -22,13 +21,12 @@ export default class Controller {
 		view.bindFilterActive(this.updateState.bind(this));
 		view.bindFilterComplete(this.updateState.bind(this));
 
-		this._activeRoute = '';
-		this._lastActiveRoute = null;
+		this.updateState('');
 	}
 
 	updateState(newState) {
-        this._activeRoute = newState;
-        this._filter();
+        this._activeState = newState;
+        this._refresh();
         this.view.updateFilterButtons(newState);
     }
 
@@ -50,24 +48,12 @@ export default class Controller {
         req.addEventListener("error", function (err) {
             console.log("Request failed for " + endpoint + " error: " + err);
         });
-        req.open(method, "http://localhost:9999/" + endpoint);
+        req.open(method, endpoint);
         if (method === "POST" || method === "PUT") {
             req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         }
         req.send(params);
     }
-
-	/**
-	 * Set and render the active route.
-	 *
-	 * @param {string} raw '' | '#/' | '#/active' | '#/completed'
-	 */
-	setView(raw) {
-		const route = raw.replace(/^#\//, '');
-		this._activeRoute = route;
-		this._filter();
-		this.view.updateFilterButtons(route);
-	}
 
 	/**
 	 * Add an Item to the Store and display it in the list.
@@ -77,7 +63,7 @@ export default class Controller {
 	addItem(title) {
 	    this.sendAjax("todos", "POST", "todo-title=" + title, function (event) {
             this.view.clearNewTodo();
-            this._filter(true);
+            this._refresh(true);
         });
 	}
 
@@ -124,7 +110,7 @@ export default class Controller {
 	 */
 	removeCompletedItems() {
         this.sendAjax("todos/completed", "DELETE", null, function (event) {
-            this._filter(true);
+            this._refresh(true);
         });
 	}
 
@@ -136,7 +122,7 @@ export default class Controller {
 	 */
 	toggleCompleted(id, completed) {
 	    this.sendAjax("todos/" + id + "/toggle_status", "PUT", "status=" + completed, function (event) {
-            this._filter(true);
+            this._refresh(true);
         });
 	}
 
@@ -146,8 +132,8 @@ export default class Controller {
 	 * @param {boolean} completed Desired completed state
 	 */
 	toggleAll(completed) {
-        this.sendAjax("todos/toggle_status", "PUT", "toggle-all=" + completed, function (event) {
-            this._filter(true);
+        this.sendAjax("todos/toggle_all", "PUT", "toggle-all=" + completed, function (event) {
+            this._refresh(true);
         });
 	}
 
@@ -156,30 +142,27 @@ export default class Controller {
 	 *
 	 * @param {boolean} [force] Force a re-paint of the list
 	 */
-	_filter(force) {
-		const route = this._activeRoute;
+	_refresh(force) {
+		const state = this._activeState;
 
-		if (force || this._lastActiveRoute !== '' || this._lastActiveRoute !== route) {
+		if (force || this._lastActiveState !== '' || this._lastActiveState !== state) {
             // an item looks like: {id:abc, title:"something", completed:true}
-            this.sendAjax("list", "POST", "status=" + route, function (event) {
+            this.sendAjax("list", "POST", "status=" + state, function (event) {
                 const respObj = JSON.parse(event.target.response);
-                this.refreshItems(respObj);
+
+                this.view.showItems(respObj);
+
+                const total = respObj.length;
+                const completed = respObj.filter(item => item.completed === true).length;
+                const active = total - completed;
+
+                this.view.setItemsLeft(active);
+                this.view.setClearCompletedButtonVisibility(completed);
+
+                this.view.setCompleteAllCheckbox(completed === total);
+                this.view.setMainVisibility(total);
             });
 		}
-		this._lastActiveRoute = route;
+		this._lastActiveState = state;
 	}
-
-	refreshItems(respObj) {
-        this.view.showItems(respObj);
-
-        const total = respObj.length;
-        const completed = respObj.filter(item => item.completed === true).length;
-        const active = total - completed;
-
-        this.view.setItemsLeft(active);
-        this.view.setClearCompletedButtonVisibility(completed);
-
-        this.view.setCompleteAllCheckbox(completed === total);
-        this.view.setMainVisibility(total);
-    }
 }

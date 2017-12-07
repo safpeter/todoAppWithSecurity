@@ -16,6 +16,8 @@ import static spark.Spark.*;
 
 public class BasicTodoList {
 
+    public static final String SUCCESS = "success";
+
     public static void main(String[] args) {
 
         TodoDao.add(Todo.create("first TODO item"));
@@ -33,7 +35,7 @@ public class BasicTodoList {
         post("/todos", (req, res) -> {
             Todo newTodo = Todo.create(req.queryParams("todo-title"));
             TodoDao.add(newTodo);
-            return newTodo.getId();  //renderTodos(req);
+            return SUCCESS;
         });
 
         // List by id
@@ -53,26 +55,26 @@ public class BasicTodoList {
         // Remove all completed
         delete("/todos/completed", (req, res) -> {
             TodoDao.removeCompleted();
-            return "";
+            return SUCCESS;
         });
 
         // Toggle all status
-        put("/todos/toggle_status", (req, res) -> {
+        put("/todos/toggle_all", (req, res) -> {
             String complete = req.queryParams("toggle-all");
             TodoDao.toggleAll(complete.equals("true"));
-            return "";
+            return SUCCESS;
         });
 
         // Remove by id
         delete("/todos/:id", (req, res) -> {
             TodoDao.remove(req.params("id"));
-            return "success";
+            return SUCCESS;
         });
 
         // Update by id
         put("/todos/:id", (req, res) -> {
             TodoDao.update(req.params("id"), req.queryParams("todo-title"));
-            return "success";
+            return SUCCESS;
         });
 
         // Find by id
@@ -84,7 +86,7 @@ public class BasicTodoList {
         put("/todos/:id/toggle_status", (req, res) -> {
             boolean completed = req.queryParams("status").equals("true");
             TodoDao.toggleStatus(req.params("id"), completed);
-            return "success";
+            return SUCCESS;
         });
     }
 
