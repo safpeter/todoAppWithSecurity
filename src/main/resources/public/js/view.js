@@ -1,10 +1,11 @@
 
-const ENTER_KEY = 13;
-const ESCAPE_KEY = 27;
-
-export default class View {
+class View {
 
 	constructor() {
+
+        View.ENTER_KEY = 13;
+        View.ESCAPE_KEY = 27;
+
 		this.$todoList = document.querySelector('.todo-list');
 		this.$todoItemCounter = document.querySelector('.todo-count');
 		this.$clearCompleted = document.querySelector('.clear-completed');
@@ -60,16 +61,20 @@ export default class View {
 	 * @param items Array of items to display
 	 */
 	showItems(items) {
-	    let str = "";
+        this.$todoList.innerHTML = "";
         for (let item of items) {
-            str += `
-<li data-id="${item.id}"${item.completed ? ' class="completed"' : ''}>
-	<input class="toggle" type="checkbox" ${item.completed ? 'checked' : ''}>
-	<label>${View.escapeForHTML(item.title)}</label>
-	<button class="destroy"></button>
-</li>`
+            let row = document.querySelector('#todoListItemTemplate');
+            let clone = document.importNode(row.content, true);
+
+            clone.querySelector("li").dataset.id = item.id;
+            if (item.completed) {
+                clone.querySelector("li").className = "completed";
+                clone.querySelector(".toggle").checked = true;
+            }
+            clone.querySelector("label").innerHTML = View.escapeForHTML(item.title);
+
+            this.$todoList.appendChild(clone);
         }
-        this.$todoList.innerHTML = str;
 	}
 
 	/**
@@ -212,7 +217,7 @@ export default class View {
 
 		// Remove the cursor from the input when you hit enter just like if it were a real form
         View.delegate(this.$todoList, 'li .edit', 'keypress', ({target, keyCode}) => {
-			if (keyCode === ENTER_KEY) {
+			if (keyCode === View.ENTER_KEY) {
 				target.blur();
 			}
 		});
@@ -223,7 +228,7 @@ export default class View {
 	 */
 	bindEditItemCancel(handler) {
 		View.delegate(this.$todoList, 'li .edit', 'keyup', ({target, keyCode}) => {
-			if (keyCode === ESCAPE_KEY) {
+			if (keyCode === View.ESCAPE_KEY) {
 				target.dataset.iscanceled = true;
 				target.blur();
 				handler(View.itemId(target));

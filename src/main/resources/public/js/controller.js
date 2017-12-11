@@ -1,10 +1,15 @@
-import View from './view.js';
 
-export default class Controller {
+class Controller {
+
 	/**
 	 * @param {!View} view A View instance
 	 */
 	constructor(view) {
+        Controller.GET = "GET";
+        Controller.POST = "POST";
+        Controller.PUT = "PUT";
+        Controller.DELETE = "DELETE";
+
 		this.view = view;
         this._activeState = '';
         this._lastActiveState = null;
@@ -49,33 +54,28 @@ export default class Controller {
             console.log("Request failed for " + endpoint + " error: " + err);
         });
         req.open(method, endpoint);
-        if (method === "POST" || method === "PUT") {
+        if (method === Controller.POST || method === Controller.PUT) {
             req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         }
         req.send(params);
     }
 
 	/**
-	 * Add an Item to the Store and display it in the list.
-	 *
-	 * @param {!string} title Title of the new item
+	 * Add an item and display it in the list.
 	 */
 	addItem(title) {
-	    this.sendAjax("todos", "POST", "todo-title=" + title, function (event) {
+	    this.sendAjax("addTodo", Controller.POST, "todo-title=" + title, function (event) {
             this.view.clearNewTodo();
             this._refresh(true);
         });
 	}
 
 	/**
-	 * Save an Item in edit.
-	 *
-	 * @param {number} id ID of the Item in edit
-	 * @param {!string} title New title for the Item in edit
+	 * Save an item in edit.
 	 */
 	editItemSave(id, title) {
 		if (title.length) {
-		    this.sendAjax("todos/" + id, "PUT",  "todo-title=" + title, function (event) {
+		    this.sendAjax("todos/" + id, Controller.PUT,  "todo-title=" + title, function (event) {
                 this.view.editItemDone(id, title);
             });
 		} else {
@@ -85,22 +85,18 @@ export default class Controller {
 
 	/**
 	 * Cancel the item editing mode.
-	 *
-	 * @param {!number} id ID of the Item in edit
 	 */
 	editItemCancel(id) {
-        this.sendAjax("todos/" + id, "GET", null, function (event) {
+        this.sendAjax("todos/" + id, Controller.GET, null, function (event) {
             this.view.editItemDone(id, event.target.response);
         });
 	}
 
 	/**
 	 * Remove the data and elements related to an Item.
-	 *
-	 * @param {!number} id Item ID of item to remove
 	 */
 	removeItem(id) {
-        this.sendAjax("todos/" + id, "DELETE", null, function (event) {
+        this.sendAjax("todos/" + id, Controller.DELETE, null, function (event) {
             this.view.removeItem(id);
         });
 	}
@@ -109,45 +105,38 @@ export default class Controller {
 	 * Remove all completed items.
 	 */
 	removeCompletedItems() {
-        this.sendAjax("todos/completed", "DELETE", null, function (event) {
+        this.sendAjax("todos/completed", Controller.DELETE, null, function (event) {
             this._refresh(true);
         });
 	}
 
 	/**
-	 * Update an Item in storage based on the state of completed.
-	 *
-	 * @param {!number} id ID of the target Item
-	 * @param {!boolean} completed Desired completed state
+	 * Update an item in based on the state of completed.
 	 */
 	toggleCompleted(id, completed) {
-	    this.sendAjax("todos/" + id + "/toggle_status", "PUT", "status=" + completed, function (event) {
+	    this.sendAjax("todos/" + id + "/toggle_status", Controller.PUT, "status=" + completed, function (event) {
             this._refresh(true);
         });
 	}
 
 	/**
 	 * Set all items to complete or active.
-	 *
-	 * @param {boolean} completed Desired completed state
 	 */
 	toggleAll(completed) {
-        this.sendAjax("todos/toggle_all", "PUT", "toggle-all=" + completed, function (event) {
+        this.sendAjax("todos/toggle_all", Controller.PUT, "toggle-all=" + completed, function (event) {
             this._refresh(true);
         });
 	}
 
 	/**
 	 * Refresh the list based on the current route.
-	 *
-	 * @param {boolean} [force] Force a re-paint of the list
 	 */
 	_refresh(force) {
 		const state = this._activeState;
 
 		if (force || this._lastActiveState !== '' || this._lastActiveState !== state) {
             // an item looks like: {id:abc, title:"something", completed:true}
-            this.sendAjax("list", "POST", "status=" + state, function (event) {
+            this.sendAjax("list", Controller.POST, "status=" + state, function (event) {
                 const respObj = JSON.parse(event.target.response);
 
                 this.view.showItems(respObj);

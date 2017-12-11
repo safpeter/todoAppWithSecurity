@@ -1,4 +1,4 @@
-import model.Status;
+
 import model.Todo;
 import model.TodoDao;
 import org.json.JSONArray;
@@ -18,9 +18,7 @@ public class BasicTodoList {
 
     public static void main(String[] args) {
 
-        TodoDao.add(Todo.create("first TODO item"));
-        TodoDao.add(Todo.create("second TODO item"));
-        TodoDao.add(Todo.create("third TODO item"));
+        addSampleData();
 
         exception(Exception.class, (e, req, res) -> e.printStackTrace()); // print all exceptions
         staticFiles.location("/public");
@@ -29,11 +27,11 @@ public class BasicTodoList {
         // Render main UI
         get("/", (req, res) -> {
             Map<String, Object> model = new HashMap<>();
-            return renderTemplate("index", model);
+            return new ThymeleafTemplateEngine().render(new ModelAndView(model, "index"));
         });
 
         // Add new
-        post("/todos", (req, res) -> {
+        post("/addTodo", (req, res) -> {
             Todo newTodo = Todo.create(req.queryParams("todo-title"));
             TodoDao.add(newTodo);
             return SUCCESS;
@@ -89,8 +87,10 @@ public class BasicTodoList {
         });
     }
 
-    private static String renderTemplate(String template, Map model) {
-        return new ThymeleafTemplateEngine().render(new ModelAndView(model, template));
+    private static void addSampleData() {
+        TodoDao.add(Todo.create("first TODO item"));
+        TodoDao.add(Todo.create("second TODO item"));
+        TodoDao.add(Todo.create("third TODO item"));
     }
 
 }
