@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="en" data-framework="es6">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>ES6 • TodoMVC</title>
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/index.css" />
 </head>
 <body>
 <section class="todoapp">
     <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" placeholder="What needs to be done?" autofocus>
+        <input class="new-todo" placeholder="What needs to be done?" autofocus="autofocus" >
     </header>
     <section style="display:none" class="main">
-        <input class="toggle-all" type="checkbox">
+        <input class="toggle-all" type="checkbox" />
         <ul class="todo-list"></ul>
     </section>
     <footer class="footer">
@@ -38,7 +38,7 @@
 <!-- templates -->
 <template id="todoListItemTemplate">
     <li>
-        <input class="toggle" type="checkbox">
+        <input class="toggle" type="checkbox" />
         <label></label>
         <button class="destroy"></button>
     </li>
