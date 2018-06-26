@@ -3,18 +3,13 @@ import model.Todo;
 import model.TodoDao;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import spark.ModelAndView;
-import spark.template.thymeleaf.ThymeleafTemplateEngine;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static spark.Spark.*;
 
 public class BasicTodoList {
 
-    public static final String SUCCESS = "success";
+    private static final String SUCCESS = "{\"success\":true}";
 
     public static void main(String[] args) {
 
@@ -23,12 +18,6 @@ public class BasicTodoList {
         exception(Exception.class, (e, req, res) -> e.printStackTrace()); // print all exceptions
         staticFiles.location("/public");
         port(9999);
-
-        // Render main UI
-        get("/", (req, res) -> {
-            Map<String, Object> model = new HashMap<>();
-            return new ThymeleafTemplateEngine().render(new ModelAndView(model, "index"));
-        });
 
         // Add new
         post("/addTodo", (req, res) -> {

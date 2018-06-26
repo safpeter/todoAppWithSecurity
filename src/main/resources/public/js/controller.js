@@ -66,6 +66,7 @@ class Controller {
         this.sendAjax("addTodo", Controller.POST, "todo-title=" + title, function (event) {
             this.view.clearNewTodo();
             this._refresh(true);
+            this._checkResponse(event.target.response, "addTodo");
         });
     }
 
@@ -76,6 +77,7 @@ class Controller {
         if (title.length) {
             this.sendAjax("todos/" + id, Controller.PUT, "todo-title=" + title, function (event) {
                 this.view.editItemDone(id, title);
+                this._checkResponse(event.target.response, "todos/" + id);
             });
         } else {
             this.removeItem(id);
@@ -97,6 +99,8 @@ class Controller {
     removeItem(id) {
         this.sendAjax("todos/" + id, Controller.DELETE, null, function (event) {
             this.view.removeItem(id);
+            this._checkResponse(event.target.response, "todos/" + id);
+
         });
     }
 
@@ -106,6 +110,7 @@ class Controller {
     removeCompletedItems() {
         this.sendAjax("todos/completed", Controller.DELETE, null, function (event) {
             this._refresh(true);
+            this._checkResponse(event.target.response, "todos/completed");
         });
     }
 
@@ -115,6 +120,7 @@ class Controller {
     toggleCompleted(id, completed) {
         this.sendAjax("todos/" + id + "/toggle_status", Controller.PUT, "status=" + completed, function (event) {
             this._refresh(true);
+            this._checkResponse(event.target.response, "todos/" + id + "/toggle_status");
         });
     }
 
@@ -124,6 +130,7 @@ class Controller {
     toggleAll(completed) {
         this.sendAjax("todos/toggle_all", Controller.PUT, "toggle-all=" + completed, function (event) {
             this._refresh(true);
+            this._checkResponse(event.target.response, "todos/toggle_all");
         });
     }
 
@@ -152,5 +159,17 @@ class Controller {
             });
         }
         this._lastActiveState = state;
+    }
+
+    _checkResponse(resp, funcName) {
+        let respObj;
+        try {
+            respObj = JSON.parse(resp);
+        } catch (e) {
+            console.log(e);
+        }
+        if (!respObj || respObj.success !== true) {
+            console.log("Error in the response for " + funcName)
+        }
     }
 }
