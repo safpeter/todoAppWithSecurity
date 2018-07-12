@@ -1,14 +1,13 @@
 package model;
 
-import java.util.UUID;
-
 public class Todo {
 
     private String title;
     private String id;
     private Status status;
+    private static int _idCounter = 0;
 
-    public Todo(String title, String id, Status status) {
+    private Todo(String title, String id, Status status) {
         this.title = title;
         this.id = id;
         this.status = status;
@@ -43,7 +42,8 @@ public class Todo {
     }
 
     public static Todo create(String title) {
-        return new Todo(title, UUID.randomUUID().toString(), Status.ACTIVE);
+        _idCounter++;
+        return new Todo(title, String.valueOf(_idCounter), Status.ACTIVE);
     }
 
 }
