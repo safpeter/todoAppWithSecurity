@@ -37,7 +37,7 @@ public class Todo {
         this.status = status;
     }
 
-    public boolean isComplete() {
+    public boolean isCompleted() {
         return this.status == Status.COMPLETE;
     }
 

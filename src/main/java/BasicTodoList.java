@@ -34,7 +34,7 @@ public class BasicTodoList {
                 JSONObject jo = new JSONObject();
                 jo.put("id", dao.getId());
                 jo.put("title", dao.getTitle());
-                jo.put("completed", dao.isComplete());
+                jo.put("completed", dao.isCompleted());
                 arr.put(jo);
             }
             return arr.toString(2);
