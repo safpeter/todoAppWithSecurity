@@ -24,9 +24,4 @@ public class Todo {
     @Enumerated(EnumType.STRING)
     private Status status = Status.ACTIVE;
 
-
-    public boolean isCompleted() {
-        return this.status == Status.COMPLETE;
-    }
-
 }

@@ -47,7 +47,7 @@ public class Controller {
 
 
     @PutMapping("/todos/{id}")
-    public String updateById(@PathVariable Long id,String title) {
+    public String updateById(@PathVariable Long id,@RequestBody  String title) {
         todoRepository.updateById(title, id);
         return success;
     }

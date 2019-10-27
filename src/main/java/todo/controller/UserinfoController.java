@@ -12,7 +12,7 @@ public class UserinfoController {
 
 
     @GetMapping("/me")
-    public String currentUser(){
+    public String currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         TodoAppUser user = (TodoAppUser) authentication.getPrincipal();
         return user.getUsername() + "\n" + user.getRoles();
