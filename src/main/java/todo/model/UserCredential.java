@@ -15,5 +15,7 @@ public class UserCredential {
     private String username;
 
     private String password;
+
+
 }
 

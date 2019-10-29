@@ -2,6 +2,7 @@ package todo.controller;
 
 
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.web.bind.annotation.*;
 import todo.model.Status;
 import todo.model.Todo;
@@ -13,6 +14,8 @@ import java.util.List;
 @CrossOrigin
 @RestController
 public class Controller {
+
+
 
     @Value("${success}")
     private String success;
@@ -66,6 +69,4 @@ public class Controller {
         }
         return success;
     }
-
-
 }

@@ -1,6 +1,8 @@
 package todo.controller;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -28,18 +32,13 @@ public class AuthController {
 
     private final JwtTokenServices jwtTokenServices;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenServices jwtTokenServices, UserRepository users) {
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenServices = jwtTokenServices;
-    }
 
-    @RequestMapping(value = "/signin", method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-            produces = {MediaType.APPLICATION_ATOM_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public @ResponseBody ResponseEntity signin(@RequestBody UserCredential data) {
+   @PostMapping("/signin")
+    public ResponseEntity signin(@RequestBody UserCredential data) {
         try {
             System.out.println(data);
             String username = data.getUsername();
+            System.out.println("user: " + username + " pw: " + data.getPassword());
             // authenticationManager.authenticate calls loadUserByUsername in CustomUserDetailsService
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, data.getPassword()));
             List<String> roles = authentication.getAuthorities()
@@ -50,12 +49,15 @@ public class AuthController {
             String token = jwtTokenServices.createToken(username, roles);
 
             Map<Object, Object> model = new HashMap<>();
-            model.put("username", username);
-            model.put("roles", roles);
             model.put("token", token);
-            return ResponseEntity.ok(model);
+            return ResponseEntity.ok((model));
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid username/password supplied");
         }
+    }
+
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenServices jwtTokenServices, UserRepository users) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenServices = jwtTokenServices;
     }
 }

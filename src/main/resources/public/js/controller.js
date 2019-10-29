@@ -21,6 +21,7 @@ class Controller {
         view.bindRemoveCompleted(this.removeCompletedItems.bind(this));
         view.bindToggleAll(this.toggleAll.bind(this));
 
+
         view.bindFilterAll(this.updateState.bind(this));
         view.bindFilterActive(this.updateState.bind(this));
         view.bindFilterComplete(this.updateState.bind(this));
@@ -46,6 +47,9 @@ class Controller {
     sendAjax(endpoint, method, params = null, onSuccess = null) {
         const scope = this;
         const req = new XMLHttpRequest();
+        let tokenWithBearer = "Bearer "+ localStorage.getItem("token");
+        console.log(tokenWithBearer);
+        req.setRequestHeader("Authorization", tokenWithBearer);
         req.addEventListener("load", function (event) {
             onSuccess.call(scope, event);
         });
@@ -56,6 +60,7 @@ class Controller {
         if (method === Controller.POST || method === Controller.PUT) {
             req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         }
+
         req.send(params);
     }
 
@@ -113,6 +118,13 @@ class Controller {
             this._checkResponse(event.target.response, "todos/completed");
         });
     }
+
+    /*login(){
+        this.sendAjax("/auth/signin", Controller.POST, null, function () {
+           let token = XMLHttpRequest.getResponseHeader("Authorization");
+            document.cookie = "JWTtoken="+token;
+        })
+    }*/
 
     /**
      * Update an item in based on the state of completed.

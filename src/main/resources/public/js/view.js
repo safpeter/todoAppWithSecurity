@@ -15,6 +15,7 @@ class View {
             this.editItem(target);
         });
 
+        this.$login = document.getElementById("submitBtn");
         this.$filterAll = document.getElementById("filter_");
         this.$filterActive = document.getElementById("filter_active");
         this.$filterComplete = document.getElementById("filter_complete");
@@ -188,6 +189,12 @@ class View {
             handler(target.checked);
         });
     }
+
+    /*bindLogin(handler){
+        this.$login.addEventListener("click", ({target}) => {
+            handler(target);
+        });
+    }*/
 
     /**
      * @param {Function} handler Function called on synthetic event.

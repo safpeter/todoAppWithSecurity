@@ -9,11 +9,11 @@
 <section class="todoapp">
     <header class="header">
         <h1>todos</h1>
-        <form action="/auth/signin" method="post">
-            <input type="text" name="username">
-            <input type="password" name="password">
-            <button type="submit">Sign in</button>
-        </form>
+        <input class="new-todo" placeholder="What needs to be done?" autofocus="autofocus" >
+            <input id="username" type="text" name="username">
+            <input id="password" type="password" name="password">
+            <button id="submitBtn">Sign in</button>
+
     </header>
     <section style="display:none" class="main">
         <input class="toggle-all" type="checkbox"/>
@@ -38,6 +38,7 @@
 <script src="js/controller.js"></script>
 <script src="js/view.js"></script>
 <script src="js/app.js"></script>
+<script src="js/login.js"></script>
 
 <!-- templates -->
 <template id="todoListItemTemplate">
